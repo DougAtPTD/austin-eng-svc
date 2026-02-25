@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Austin Smith Engineering | Custom Automotive Product Development</title>
+    <meta name="description" content="Multidisciplinary product development engineer in the Chicago suburbs. Custom and aftermarket automotive products — from concept through fabrication and validation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #161616;
+            --bg-card: #1a1a1a;
+            --accent: #FF6B35;
+            --accent-dim: rgba(255, 107, 53, 0.15);
+            --accent-glow: rgba(255, 107, 53, 0.4);
+            --text-primary: #e8e6e3;
+            --text-secondary: #8a8a8a;
+            --text-muted: #555;
+            --border: rgba(255, 255, 255, 0.06);
+            --border-accent: rgba(255, 107, 53, 0.25);
+            --font-display: 'Chakra Petch', sans-serif;
+            --font-body: 'IBM Plex Sans', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Blueprint Grid Background ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Noise Texture Overlay ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 256px 256px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        section, header, footer, nav { position: relative; z-index: 1; }
+
+        /* ── Typography ── */
+        h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; letter-spacing: 0.02em; }
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-label::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            line-height: 1.15;
+        }
+
+        /* ── Container ── */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ── Navigation ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.25rem 0;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(0px);
+        }
+
+        nav.scrolled {
+            background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.85rem 0;
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-mark {
+            width: 42px;
+            height: 42px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-mark svg { width: 100%; height: 100%; }
+
+        .logo-text {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            line-height: 1.3;
+        }
+
+        .logo-text span {
+            display: block;
+            font-size: 0.6rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            letter-spacing: 0.2em;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-links a:hover::after { width: 100%; }
+
+        .nav-cta {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent) !important;
+            padding: 0.55rem 1.25rem;
+            font-family: var(--font-mono) !important;
+            font-size: 0.7rem !important;
+            letter-spacing: 0.12em !important;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .nav-cta:hover {
+            background: var(--accent);
+            color: var(--bg-primary) !important;
+        }
+
+        .nav-cta::after { display: none !important; }
+
+        /* Mobile menu toggle */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .menu-toggle span {
+            display: block;
+            width: 24px;
+            height: 1.5px;
+            background: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        /* ── Hero Section ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Crosshair decorative element */
+        .hero-crosshair {
+            position: absolute;
+            top: 50%;
+            right: 12%;
+            transform: translateY(-50%);
+            width: 200px;
+            height: 200px;
+            opacity: 0.07;
+            pointer-events: none;
+        }
+
+        .hero-crosshair::before,
+        .hero-crosshair::after {
+            content: '';
+            position: absolute;
+            background: var(--accent);
+        }
+
+        .hero-crosshair::before {
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+        }
+
+        .hero-crosshair::after {
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+        }
+
+        .hero-content { max-width: 720px; }
+
+        /* ── Image Placeholders ── */
+        .img-placeholder {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-primary));
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+        }
+
+        .img-placeholder::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,107,53,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,107,53,0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .img-placeholder:hover { border-color: var(--border-accent); }
+
+        .img-placeholder-inner {
+            text-align: center;
+            z-index: 1;
+            padding: 1.5rem;
+        }
+
+        .img-placeholder-icon {
+            width: 36px;
+            height: 36px;
+            margin: 0 auto 0.75rem;
+            color: var(--accent);
+            opacity: 0.5;
+        }
+
+        .img-placeholder-label {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .project-images .img-placeholder:first-child { height: 280px; grid-column: 1 / -1; }
+        .project-images .img-placeholder:not(:first-child) { height: 200px; }
+
+        .hero-content { padding-top: 5rem; }
+
+        .hero-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease forwards;
+            animation-delay: 0.2s;
+        }
+
+        .hero-eyebrow::before {
+            content: '';
+            width: 40px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        .hero h1 {
+            font-size: clamp(2.8rem, 6vw, 4.5rem);
+            line-height: 1.05;
+            margin-bottom: 1.75rem;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease forwards;
+            animation-delay: 0.4s;
+        }
+
+        .hero h1 .highlight {
+            color: var(--accent);
+            position: relative;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            max-width: 540px;
+            margin-bottom: 2.5rem;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease forwards;
+            animation-delay: 0.6s;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease forwards;
+            animation-delay: 0.8s;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.9rem 2rem;
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+        .btn-primary:hover::before { opacity: 1; }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
+        }
+
+        .btn-secondary:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            margin-top: 4rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid var(--border);
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease forwards;
+            animation-delay: 1s;
+        }
+
+        .stat h3 {
+            font-size: 2rem;
+            color: var(--accent);
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat p {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* ── Services Section ── */
+        .services { padding: 8rem 0; }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.4s;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .service-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-4px);
+        }
+
+        .service-card:hover::before { opacity: 1; }
+
+        .service-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .service-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .service-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        /* ── Projects Section ── */
+        .projects {
+            padding: 8rem 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .project {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-top: 4rem;
+            padding-bottom: 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .project:last-child { border-bottom: none; padding-bottom: 0; }
+        .project:nth-child(even) .project-images { order: -1; }
+
+        .project-meta {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .project-meta::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        .project-info h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            line-height: 1.25;
+        }
+
+        .project-info p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+            line-height: 1.8;
+        }
+
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .project-tag {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.35rem 0.75rem;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: var(--bg-primary);
+        }
+
+        .project-images {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        /* img styles available when real images are added */
+        .project-images img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            filter: grayscale(20%) contrast(1.05);
+            transition: all 0.4s;
+        }
+        .project-images img:first-child { grid-column: 1 / -1; height: 280px; }
+        .project-images img:hover { filter: grayscale(0%) contrast(1.1); border-color: var(--border-accent); }
+
+        /* 4-image variant: hero + 3 below */
+        .project-images-4 { grid-template-columns: repeat(3, 1fr); }
+        .project-images-4 img:first-child { grid-column: 1 / -1; height: 280px; }
+        .project-images-4 img:not(:first-child) { height: 160px; }
+
+        /* ── Process Section ── */
+        .process { padding: 8rem 0; }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+            position: relative;
+        }
+
+        /* Connecting line */
+        .process-grid::before {
+            content: '';
+            position: absolute;
+            top: 32px;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-accent), var(--border-accent), transparent);
+        }
+
+        .process-step {
+            text-align: center;
+            position: relative;
+        }
+
+        .process-number {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+            border: 1px solid var(--border-accent);
+            background: var(--bg-primary);
+            position: relative;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        .process-step h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .process-step p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.7;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+
+        /* ── About Section ── */
+        .about {
+            padding: 8rem 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-top: 3rem;
+            align-items: start;
+        }
+
+        .about-text p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .tool-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            transition: border-color 0.3s;
+        }
+
+        .tool-item:hover { border-color: var(--border-accent); }
+
+        .tool-item .tool-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .tool-item span {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        /* ── Contact Section ── */
+        .contact { padding: 8rem 0; }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            margin-top: 3rem;
+        }
+
+        .contact-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .contact-info p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .contact-detail {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            letter-spacing: 0.03em;
+        }
+
+        .contact-detail svg { color: var(--accent); flex-shrink: 0; }
+
+        .contact-detail a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .contact-detail a:hover { color: var(--accent); }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .form-group { position: relative; }
+
+        .form-group label {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.9rem 1rem;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .form-group textarea { resize: vertical; min-height: 140px; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .btn-submit {
+            align-self: flex-start;
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.9rem 2.5rem;
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+
+        /* ── Footer ── */
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-content p {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .footer-coords {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Stagger children */
+        .stagger-children .reveal:nth-child(1) { transition-delay: 0.05s; }
+        .stagger-children .reveal:nth-child(2) { transition-delay: 0.12s; }
+        .stagger-children .reveal:nth-child(3) { transition-delay: 0.19s; }
+        .stagger-children .reveal:nth-child(4) { transition-delay: 0.26s; }
+        .stagger-children .reveal:nth-child(5) { transition-delay: 0.33s; }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .project { grid-template-columns: 1fr; gap: 2rem; }
+            .project:nth-child(even) .project-images { order: 0; }
+            .process-grid { grid-template-columns: repeat(2, 1fr); gap: 3rem; }
+            .process-grid::before { display: none; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .nav-links.active {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-primary);
+                backdrop-filter: blur(20px);
+                padding: 2rem;
+                gap: 1.5rem;
+                border-bottom: 1px solid var(--border);
+                z-index: 100;
+            }
+            .menu-toggle { display: flex; }
+            .hero h1 { font-size: 2.4rem; }
+            .hero-stats { flex-direction: column; gap: 1.5rem; }
+            .services-grid { grid-template-columns: 1fr; }
+            .about-grid { grid-template-columns: 1fr; }
+            .contact-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .process-grid { grid-template-columns: 1fr; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .footer-content { flex-direction: column; gap: 1rem; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ Navigation ═══ -->
+    <nav id="navbar">
+        <div class="container">
+            <a href="#" class="nav-logo">
+                <div class="logo-mark">
+                    <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Outer hexagonal border -->
+                        <path d="M21 2 L38 11.5 L38 30.5 L21 40 L4 30.5 L4 11.5 Z" stroke="#FF6B35" stroke-width="1.2" fill="none"/>
+                        <!-- Inner A + S monogram -->
+                        <text x="50%" y="54%" text-anchor="middle" dominant-baseline="central" font-family="Chakra Petch, sans-serif" font-weight="700" font-size="16" fill="#FF6B35">AS</text>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    Austin Smith
+                    <span>Engineering</span>
+                </div>
+            </a>
+
+            <button class="menu-toggle" onclick="document.querySelector('.nav-links').classList.toggle('active')" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+
+            <ul class="nav-links">
+                <li><a href="#services">Services</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#process">Process</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact" class="nav-cta">Get a Quote</a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <!-- ═══ Hero ═══ -->
+    <section class="hero">
+        <div class="hero-crosshair"></div>
+        <div class="container">
+            <div class="hero-content">
+                <p class="hero-eyebrow">Chicago Suburbs &mdash; Product Development</p>
+                <h1>
+                    Engineering Custom<br>
+                    <span class="highlight">Automotive</span> Products
+                </h1>
+                <p class="hero-description">
+                    Multidisciplinary engineer developing custom and aftermarket automotive products built for durability and performance. From reverse engineering through fabrication and validation &mdash; full product lifecycle support.
+                </p>
+                <div class="hero-actions">
+                    <a href="#contact" class="btn-primary">
+                        Request a Quote
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                    <a href="#projects" class="btn-secondary">View Projects</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <h3>5+</h3>
+                        <p>Services Offered</p>
+                    </div>
+                    <div class="stat">
+                        <h3>Full</h3>
+                        <p>Product Lifecycle</p>
+                    </div>
+                    <div class="stat">
+                        <h3>CAD</h3>
+                        <p>to Fabrication</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══ Services ═══ -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="reveal">
+                <p class="section-label">What I Do</p>
+                <h2 class="section-title">Engineering Services</h2>
+            </div>
+            <div class="services-grid stagger-children">
+                <div class="service-card reveal">
+                    <div class="service-icon">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
+                    </div>
+                    <h3>Reverse Engineering &amp; Part Replication</h3>
+                    <p>Precision scanning and measurement of existing components for replication, modification, or improvement of legacy and discontinued parts.</p>
+                </div>
+                <div class="service-card reveal">
+                    <div class="service-icon">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+                    </div>
+                    <h3>Structural Part Design</h3>
+                    <p>Custom brackets, mounts, and structural components designed with FEA validation to ensure durability under real-world loading conditions.</p>
+                </div>
+                <div class="service-card reveal">
+                    <div class="service-icon">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    </div>
+                    <h3>Performance System Optimization</h3>
+                    <p>Lightweighting and flow improvement for performance-oriented applications. Material selection and geometry optimization for maximum efficiency.</p>
+                </div>
+                <div class="service-card reveal">
+                    <div class="service-icon">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    </div>
+                    <h3>Electronics Integration &amp; Wiring</h3>
+                    <p>Complete electrical system design including harness routing, module placement, and integration of aftermarket electronics into existing vehicle platforms.</p>
+                </div>
+                <div class="service-card reveal">
+                    <div class="service-icon">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    </div>
+                    <h3>General CAD Services</h3>
+                    <p>Professional 3D modeling, assemblies, and technical drawings for manufacturing. From concept sketches to production-ready CAD files.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══ Projects ═══ -->
+    <section class="projects" id="projects">
+        <div class="container">
+            <div class="reveal">
+                <p class="section-label">Portfolio</p>
+                <h2 class="section-title">Featured Projects</h2>
+            </div>
+
+            <!-- Project 1: Brake Controller Mount -->
+            <div class="project reveal">
+                <div class="project-info">
+                    <p class="project-meta">Automotive &mdash; Custom Fabrication</p>
+                    <h3>2019–2023 Ford Ranger Brake Controller Mount</h3>
+                    <p>Designed and fabricated a custom dashboard-mounted brake controller installation solution for the Ford Ranger platform. The project required creating precision mounting brackets to seamlessly integrate aftermarket braking equipment into the factory dashboard without modification to the vehicle.</p>
+                    <div class="project-tags">
+                        <span class="project-tag">CAD Design</span>
+                        <span class="project-tag">Bracket Fabrication</span>
+                        <span class="project-tag">Dashboard Integration</span>
+                    </div>
+                </div>
+                <div class="project-images">
+                    <img src="images/dash-bracket-cad-mockup.png" alt="CAD mockup of brake controller module on custom dash bracket" loading="lazy">
+                    <img src="images/brake-controller-mount.png" alt="Brake controller mount installed under Ford Ranger dashboard" loading="lazy">
+                    <img src="images/bracket-mount.png" alt="Fabricated bracket with brake controller module" loading="lazy">
+                </div>
+            </div>
+
+            <!-- Project 2: Factory Five Electronics -->
+            <div class="project reveal">
+                <div class="project-info">
+                    <p class="project-meta">Kit Car &mdash; Electronics Design</p>
+                    <h3>Factory Five Type 65 Electronics Mounting</h3>
+                    <p>Using 3D scanning technology and professional wiring expertise, designed complete positioning and mounting solutions for the main electronics in a Factory Five Type 65 Kit Car. Included harness design validation and structural analysis of all mounting brackets for reliability under vibration.</p>
+                    <div class="project-tags">
+                        <span class="project-tag">3D Scanning</span>
+                        <span class="project-tag">Wiring Design</span>
+                        <span class="project-tag">FEA Analysis</span>
+                        <span class="project-tag">Harness Validation</span>
+                    </div>
+                </div>
+                <div class="project-images project-images-4">
+                    <img src="images/daytona1.png" alt="Factory Five Type 65 kit car in shop" loading="lazy">
+                    <img src="images/daytona-3d-scan.png" alt="3D chassis scan showing electronics module placement" loading="lazy">
+                    <img src="images/daytona-pcm.png" alt="CAD render of PCM module with harness connectors" loading="lazy">
+                    <img src="images/daytona-bracket-analysis.png" alt="FEA stress analysis of electronics mounting bracket" loading="lazy">
+                </div>
+            </div>
+
+            <!-- Project 3: FSAE Chassis -->
+            <div class="project reveal">
+                <div class="project-info">
+                    <p class="project-meta">Motorsport &mdash; Chassis Design</p>
+                    <h3>2022 West Virginia Formula SAE Chassis</h3>
+                    <p>Designed the SAE series' first hybrid steel and titanium chassis to improve serviceability and leverage lighter materials without sacrificing critical characteristics like roll stiffness. Featured a titanium subframe engineered to separate for engine servicing without full removal.</p>
+                    <div class="project-tags">
+                        <span class="project-tag">Titanium</span>
+                        <span class="project-tag">Hybrid Materials</span>
+                        <span class="project-tag">Chassis Design</span>
+                        <span class="project-tag">FSAE</span>
+                    </div>
+                </div>
+                <div class="project-images">
+                    <img src="images/sae-racecar.png" alt="WVU Formula SAE race car #35 on track" loading="lazy">
+                    <img src="images/sae-chassis-cad.png" alt="CAD render of hybrid steel and titanium FSAE chassis" loading="lazy">
+                    <img src="images/sae-subframe.png" alt="Fabricated titanium subframe in shop" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══ Process ═══ -->
+    <section class="process" id="process">
+        <div class="container">
+            <div class="reveal">
+                <p class="section-label">How It Works</p>
+                <h2 class="section-title">From Concept to Reality</h2>
+            </div>
+            <div class="process-grid stagger-children">
+                <div class="process-step reveal">
+                    <div class="process-number">01</div>
+                    <h3>Consultation</h3>
+                    <p>We discuss your needs, constraints, and goals. I evaluate feasibility and outline the best approach.</p>
+                </div>
+                <div class="process-step reveal">
+                    <div class="process-number">02</div>
+                    <h3>Design</h3>
+                    <p>Detailed CAD modeling with structural analysis. Iterative refinement until the design meets all requirements.</p>
+                </div>
+                <div class="process-step reveal">
+                    <div class="process-number">03</div>
+                    <h3>Prototype</h3>
+                    <p>Physical prototyping and test fitting. Validation against real-world conditions before final production.</p>
+                </div>
+                <div class="process-step reveal">
+                    <div class="process-number">04</div>
+                    <h3>Delivery</h3>
+                    <p>Final fabrication and quality verification. Complete documentation and installation support included.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══ About ═══ -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="reveal">
+                <p class="section-label">About</p>
+                <h2 class="section-title">Austin Smith</h2>
+            </div>
+            <div class="about-grid">
+                <div class="about-text reveal">
+                    <p>I'm a multidisciplinary product development engineer based in the Chicago suburbs, specializing in custom and aftermarket automotive products. My work spans the entire product lifecycle &mdash; from reverse engineering existing components through design, fabrication, and final validation.</p>
+                    <p>Every product I develop is built with durability and performance as the primary design criteria. Whether it's a precision mounting bracket, a full wiring harness, or a competition chassis, I bring the same rigorous engineering approach to every project.</p>
+                    <p>With experience across 3D scanning, CAD, FEA, electrical design, and hands-on fabrication, I offer truly end-to-end product development capability under one roof.</p>
+                </div>
+                <div class="reveal">
+                    <p class="section-label">Tools &amp; Capabilities</p>
+                    <div class="tools-grid">
+                        <div class="tool-item">
+                            <div class="tool-dot"></div>
+                            <span>3D CAD Modeling</span>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-dot"></div>
+                            <span>3D Scanning</span>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-dot"></div>
+                            <span>FEA / Structural Analysis</span>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-dot"></div>
+                            <span>Wiring &amp; Harness Design</span>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-dot"></div>
+                            <span>Reverse Engineering</span>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-dot"></div>
+                            <span>Prototyping</span>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-dot"></div>
+                            <span>Material Selection</span>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-dot"></div>
+                            <span>Technical Documentation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══ Contact ═══ -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="reveal">
+                <p class="section-label">Get in Touch</p>
+                <h2 class="section-title">Start Your Project</h2>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info reveal">
+                    <h3>Let's build something.</h3>
+                    <p>Have a custom part, product idea, or engineering challenge? Reach out and let's discuss how I can help bring your project to life.</p>
+                    <div class="contact-detail">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <a href="mailto:austinsmith0044@gmail.com">austinsmith0044@gmail.com</a>
+                    </div>
+                    <div class="contact-detail">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>Chicago Suburbs, IL</span>
+                    </div>
+                    <div class="contact-detail" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <span>Currently accepting new projects</span>
+                    </div>
+                </div>
+                <form class="contact-form reveal" onsubmit="handleSubmit(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" required placeholder="Your name">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required placeholder="you@company.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <input type="text" id="subject" name="subject" placeholder="Project type or brief description">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Project Details</label>
+                        <textarea id="message" name="message" required placeholder="Describe your project, timeline, and any specific requirements..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ═══ Footer ═══ -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2026 Austin Smith Engineering. All rights reserved.</p>
+                <div class="footer-coords">Chicago Suburbs, IL</div>
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        // ── Navbar scroll effect ──
+        const navbar = document.getElementById('navbar');
+        let lastScroll = 0;
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.scrollY;
+            if (currentScroll > 60) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            lastScroll = currentScroll;
+        });
+
+        // ── Scroll reveal ──
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // ── Smooth scroll for nav links ──
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const navHeight = navbar.offsetHeight;
+                    const targetPosition = target.getBoundingClientRect().top + window.scrollY - navHeight - 20;
+                    window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                }
+                // Close mobile menu if open
+                document.querySelector('.nav-links').classList.remove('active');
+            });
+        });
+
+        // ── Contact form handler ──
+        function handleSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const name = form.name.value;
+            const email = form.email.value;
+            const subject = form.subject.value;
+            const message = form.message.value;
+
+            // Build mailto link as fallback
+            const mailtoSubject = encodeURIComponent(subject || 'New Project Inquiry');
+            const mailtoBody = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+            window.location.href = `mailto:austinsmith0044@gmail.com?subject=${mailtoSubject}&body=${mailtoBody}`;
+        }
+    </script>
+
+</body>
+</html>
