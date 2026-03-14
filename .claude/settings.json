@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"environmentVariables\": {\"LAST_POLL_TIME\": \"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\"}}'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Before stopping, check board_poll_changes for any new work or feedback from the other agent since $LAST_POLL_TIME. If there is actionable work (new story to review, change requests, etc.), describe it and ask the user if they want to handle it now. Otherwise, confirm there is nothing pending.",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
