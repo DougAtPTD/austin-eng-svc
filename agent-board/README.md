@@ -34,26 +34,23 @@ npm install
 npm run build
 ```
 
-### 2. Configure your project
+### 2. Initialize your project
 
-Copy the `.mcp.json` from this repo into any project you want to coordinate on. Edit the `AGENT_BOARD_PROJECT` value to match your project name, and update the path to the server:
+Run the init script from any project directory. It's safe for existing projects — it appends to your `CLAUDE.md` and merges into existing `.claude/settings.json` rather than overwriting.
 
-```json
-{
-  "mcpServers": {
-    "agent-board": {
-      "command": "node",
-      "args": ["/absolute/path/to/agent-board/dist/index.js"],
-      "env": {
-        "AGENT_BOARD_ROLE": "${AGENT_BOARD_ROLE}",
-        "AGENT_BOARD_PROJECT": "my-project-name"
-      }
-    }
-  }
-}
+```bash
+# From your project directory:
+/path/to/agent-board/scripts/init-project.sh my-project-name
+
+# Or specify both project name and target directory:
+/path/to/agent-board/scripts/init-project.sh my-project-name /path/to/project
 ```
 
-Also copy the `.claude/` directory (commands and settings) and `CLAUDE.md` into your project root. These give each agent its slash commands, hooks, and role-aware instructions.
+This will:
+- Create or update `.mcp.json` with the agent-board server config
+- Append board coordination instructions to your `CLAUDE.md` (or create one)
+- Merge SessionStart/Stop hooks into `.claude/settings.json` (or create one)
+- Install all 9 slash commands into `.claude/commands/`
 
 ### 3. Launch the agents
 
@@ -74,7 +71,11 @@ Optionally, open a third terminal to observe as a human:
 AGENT_BOARD_ROLE=human claude
 ```
 
-That's it. The PM can start creating stories with `/pm-create-story`, and the Developer can pick them up with `/dev-pickup`.
+Then in each session:
+- **PM**: Run `/pm-start` for a role briefing, then `/pm-run` to enter the continuous workflow loop
+- **Dev**: Run `/dev-start` for a role briefing, then `/dev-run` to enter the continuous workflow loop
+
+Or use individual commands (`/pm-create-story`, `/dev-pickup`, etc.) for one-off actions.
 
 ## Workflow
 
@@ -114,14 +115,23 @@ Invalid transitions are rejected by the server.
 
 ## Slash Commands
 
-### PM Commands
+### Workflow Drivers
+
+| Command | Description |
+|---------|-------------|
+| `/pm-start` | Full PM role briefing — responsibilities, tools, quality standards, getting started |
+| `/pm-run` | **PM main loop** — continuously review submissions, manage backlog, create stories |
+| `/dev-start` | Full Developer role briefing — responsibilities, tools, work standards, getting started |
+| `/dev-run` | **Dev main loop** — continuously pick up work, implement, submit, address feedback |
+
+### PM Action Commands
 
 | Command | Description |
 |---------|-------------|
 | `/pm-create-story [title]` | Create a story with structured description, tech spec, and acceptance criteria |
 | `/pm-review [story_id]` | Review a submitted story against its acceptance criteria |
 
-### Developer Commands
+### Developer Action Commands
 
 | Command | Description |
 |---------|-------------|
@@ -244,6 +254,9 @@ The database lives at `~/.agent-board/board.db` by default. Override with the `A
 ### Utility Scripts
 
 ```bash
+# Initialize agent-board in any project directory
+./scripts/init-project.sh my-project-name /path/to/project
+
 # Reset the database (deletes all data)
 ./scripts/reset-board.sh
 
@@ -276,20 +289,24 @@ The server enforces role-based access. The `human` role can do everything.
 
 ### File Layout
 
-To set up a new project with agent-board coordination, copy these files into the project root:
+The `init-project.sh` script installs these files into your project:
 
 ```
 your-project/
 ├── .mcp.json                  # MCP server config (set AGENT_BOARD_PROJECT)
-├── CLAUDE.md                  # Role-aware instructions for both agents
+├── CLAUDE.md                  # Role-aware instructions (appended to existing)
 └── .claude/
-    ├── settings.json          # SessionStart + Stop hooks
+    ├── settings.json          # SessionStart + Stop hooks (merged with existing)
     └── commands/
-        ├── pm-create-story.md # /pm-create-story slash command
-        ├── pm-review.md       # /pm-review slash command
-        ├── dev-pickup.md      # /dev-pickup slash command
-        ├── dev-submit.md      # /dev-submit slash command
-        └── dev-status.md      # /dev-status slash command
+        ├── pm-start.md        # /pm-start — PM role briefing
+        ├── pm-run.md          # /pm-run — PM continuous workflow loop
+        ├── pm-create-story.md # /pm-create-story — create a story
+        ├── pm-review.md       # /pm-review — review a submission
+        ├── dev-start.md       # /dev-start — Dev role briefing
+        ├── dev-run.md         # /dev-run — Dev continuous workflow loop
+        ├── dev-pickup.md      # /dev-pickup — pick up next story
+        ├── dev-submit.md      # /dev-submit — submit work for review
+        └── dev-status.md      # /dev-status — check board state
 ```
 
 ## Development
