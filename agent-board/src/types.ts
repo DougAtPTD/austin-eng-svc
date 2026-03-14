@@ -20,6 +20,7 @@ export type CommentType =
 
 export interface Story {
   id: string;
+  project_id: string;
   title: string;
   description: string;
   technical_spec: string;
@@ -44,9 +45,16 @@ export interface Comment {
 
 export interface ActivityLogEntry {
   id: string;
+  project_id: string;
   story_id: string | null;
   actor: Role | 'system';
   action: string;
   details: string;
+  created_at: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
   created_at: string;
 }

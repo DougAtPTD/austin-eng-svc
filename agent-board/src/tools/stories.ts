@@ -5,7 +5,7 @@ import { getDb } from '../db/connection.js';
 import { canUseRole } from '../constants.js';
 import type { Role, Story } from '../types.js';
 
-export function registerStoryTools(server: McpServer, role: Role): void {
+export function registerStoryTools(server: McpServer, role: Role, projectId: string): void {
   server.tool(
     'board_create_story',
     'Create a new story on the board. PM only.',
@@ -25,10 +25,11 @@ export function registerStoryTools(server: McpServer, role: Role): void {
       const now = new Date().toISOString();
 
       db.prepare(`
-        INSERT INTO stories (id, title, description, technical_spec, acceptance_criteria, priority, state, created_by, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, 'backlog', ?, ?, ?)
+        INSERT INTO stories (id, project_id, title, description, technical_spec, acceptance_criteria, priority, state, created_by, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'backlog', ?, ?, ?)
       `).run(
         id,
+        projectId,
         params.title,
         params.description ?? '',
         params.technical_spec ?? '',
@@ -41,9 +42,9 @@ export function registerStoryTools(server: McpServer, role: Role): void {
 
       const logId = `log_${nanoid(8)}`;
       db.prepare(`
-        INSERT INTO activity_log (id, story_id, actor, action, details, created_at)
-        VALUES (?, ?, ?, 'created', ?, ?)
-      `).run(logId, id, role, JSON.stringify({ title: params.title }), now);
+        INSERT INTO activity_log (id, project_id, story_id, actor, action, details, created_at)
+        VALUES (?, ?, ?, ?, 'created', ?, ?)
+      `).run(logId, projectId, id, role, JSON.stringify({ title: params.title }), now);
 
       const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(id) as Story;
       return { content: [{ type: 'text', text: JSON.stringify(story, null, 2) }] };
@@ -66,9 +67,9 @@ export function registerStoryTools(server: McpServer, role: Role): void {
         return { content: [{ type: 'text', text: `Error: Role "${role}" cannot update stories. Only PM can.` }], isError: true };
       }
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
 
       const updates: string[] = [];
@@ -97,9 +98,9 @@ export function registerStoryTools(server: McpServer, role: Role): void {
 
       const logId = `log_${nanoid(8)}`;
       db.prepare(`
-        INSERT INTO activity_log (id, story_id, actor, action, details, created_at)
-        VALUES (?, ?, ?, 'updated', ?, ?)
-      `).run(logId, params.story_id, role, JSON.stringify(changes), now);
+        INSERT INTO activity_log (id, project_id, story_id, actor, action, details, created_at)
+        VALUES (?, ?, ?, ?, 'updated', ?, ?)
+      `).run(logId, projectId, params.story_id, role, JSON.stringify(changes), now);
 
       const updated = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story;
       return { content: [{ type: 'text', text: JSON.stringify(updated, null, 2) }] };
@@ -117,9 +118,9 @@ export function registerStoryTools(server: McpServer, role: Role): void {
         return { content: [{ type: 'text', text: `Error: Role "${role}" cannot delete stories. Only PM can.` }], isError: true };
       }
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
       if (story.state !== 'backlog' && story.state !== 'done') {
         return { content: [{ type: 'text', text: `Error: Can only delete stories in "backlog" or "done" state. Current state: "${story.state}".` }], isError: true };
@@ -138,9 +139,9 @@ export function registerStoryTools(server: McpServer, role: Role): void {
     },
     async (params) => {
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
 
       const comments = db.prepare('SELECT * FROM comments WHERE story_id = ? ORDER BY created_at ASC').all(params.story_id);

@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 import { getDb } from '../db/connection.js';
 import type { Role, Story, Comment } from '../types.js';
 
-export function registerCommentTools(server: McpServer, role: Role): void {
+export function registerCommentTools(server: McpServer, role: Role, projectId: string): void {
   server.tool(
     'board_add_comment',
     'Add a comment to a story discussion thread.',
@@ -17,9 +17,9 @@ export function registerCommentTools(server: McpServer, role: Role): void {
     },
     async (params) => {
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
 
       const now = new Date().toISOString();
@@ -31,9 +31,9 @@ export function registerCommentTools(server: McpServer, role: Role): void {
 
       const logId = `log_${nanoid(8)}`;
       db.prepare(`
-        INSERT INTO activity_log (id, story_id, actor, action, details, created_at)
-        VALUES (?, ?, ?, 'comment', ?, ?)
-      `).run(logId, params.story_id, role, JSON.stringify({ comment_id: id, type: params.comment_type ?? 'comment' }), now);
+        INSERT INTO activity_log (id, project_id, story_id, actor, action, details, created_at)
+        VALUES (?, ?, ?, ?, 'comment', ?, ?)
+      `).run(logId, projectId, params.story_id, role, JSON.stringify({ comment_id: id, type: params.comment_type ?? 'comment' }), now);
 
       const comment = db.prepare('SELECT * FROM comments WHERE id = ?').get(id) as Comment;
       return { content: [{ type: 'text', text: JSON.stringify(comment, null, 2) }] };

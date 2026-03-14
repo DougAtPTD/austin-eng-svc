@@ -2,8 +2,15 @@ import type Database from 'better-sqlite3';
 
 export function initSchema(db: Database.Database): void {
   db.exec(`
+    CREATE TABLE IF NOT EXISTS projects (
+      id                  TEXT PRIMARY KEY,
+      name                TEXT NOT NULL,
+      created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS stories (
       id                  TEXT PRIMARY KEY,
+      project_id          TEXT NOT NULL REFERENCES projects(id),
       title               TEXT NOT NULL,
       description         TEXT NOT NULL DEFAULT '',
       technical_spec      TEXT NOT NULL DEFAULT '',
@@ -37,6 +44,7 @@ export function initSchema(db: Database.Database): void {
 
     CREATE TABLE IF NOT EXISTS activity_log (
       id            TEXT PRIMARY KEY,
+      project_id    TEXT NOT NULL REFERENCES projects(id),
       story_id      TEXT REFERENCES stories(id) ON DELETE CASCADE,
       actor         TEXT NOT NULL,
       action        TEXT NOT NULL,
@@ -44,9 +52,11 @@ export function initSchema(db: Database.Database): void {
       created_at    TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
-    CREATE INDEX IF NOT EXISTS idx_stories_state ON stories(state);
-    CREATE INDEX IF NOT EXISTS idx_stories_assigned ON stories(assigned_to);
-    CREATE INDEX IF NOT EXISTS idx_stories_priority ON stories(priority);
+    CREATE INDEX IF NOT EXISTS idx_stories_project ON stories(project_id);
+    CREATE INDEX IF NOT EXISTS idx_stories_state ON stories(project_id, state);
+    CREATE INDEX IF NOT EXISTS idx_stories_assigned ON stories(project_id, assigned_to);
+    CREATE INDEX IF NOT EXISTS idx_stories_priority ON stories(project_id, priority);
+    CREATE INDEX IF NOT EXISTS idx_activity_project ON activity_log(project_id);
     CREATE INDEX IF NOT EXISTS idx_comments_story ON comments(story_id);
     CREATE INDEX IF NOT EXISTS idx_activity_story ON activity_log(story_id);
     CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at);

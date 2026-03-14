@@ -5,7 +5,7 @@ import { getDb } from '../db/connection.js';
 import { canUseRole, isValidTransition } from '../constants.js';
 import type { Role, Story } from '../types.js';
 
-export function registerWorkflowTools(server: McpServer, role: Role): void {
+export function registerWorkflowTools(server: McpServer, role: Role, projectId: string): void {
   server.tool(
     'board_pickup_story',
     'Pick up a story: assigns to you and moves to in_progress. Dev only.',
@@ -17,9 +17,9 @@ export function registerWorkflowTools(server: McpServer, role: Role): void {
         return { content: [{ type: 'text', text: `Error: Role "${role}" cannot pick up stories. Only dev can.` }], isError: true };
       }
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
 
       if (!isValidTransition(story.state, 'in_progress')) {
@@ -35,9 +35,9 @@ export function registerWorkflowTools(server: McpServer, role: Role): void {
 
       const logId = `log_${nanoid(8)}`;
       db.prepare(`
-        INSERT INTO activity_log (id, story_id, actor, action, details, created_at)
-        VALUES (?, ?, ?, 'state_change', ?, ?)
-      `).run(logId, params.story_id, role, JSON.stringify({ from: story.state, to: 'in_progress', pickup: true }), now);
+        INSERT INTO activity_log (id, project_id, story_id, actor, action, details, created_at)
+        VALUES (?, ?, ?, ?, 'state_change', ?, ?)
+      `).run(logId, projectId, params.story_id, role, JSON.stringify({ from: story.state, to: 'in_progress', pickup: true }), now);
 
       const updated = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story;
       return { content: [{ type: 'text', text: JSON.stringify(updated, null, 2) }] };
@@ -56,9 +56,9 @@ export function registerWorkflowTools(server: McpServer, role: Role): void {
         return { content: [{ type: 'text', text: `Error: Role "${role}" cannot submit for review. Only dev can.` }], isError: true };
       }
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
       if (story.state !== 'in_progress') {
         return { content: [{ type: 'text', text: `Error: Story must be "in_progress" to submit. Current state: "${story.state}".` }], isError: true };
@@ -76,9 +76,9 @@ export function registerWorkflowTools(server: McpServer, role: Role): void {
 
       const logId = `log_${nanoid(8)}`;
       db.prepare(`
-        INSERT INTO activity_log (id, story_id, actor, action, details, created_at)
-        VALUES (?, ?, ?, 'state_change', ?, ?)
-      `).run(logId, params.story_id, role, JSON.stringify({ from: 'in_progress', to: 'agent_review', submission: true }), now);
+        INSERT INTO activity_log (id, project_id, story_id, actor, action, details, created_at)
+        VALUES (?, ?, ?, ?, 'state_change', ?, ?)
+      `).run(logId, projectId, params.story_id, role, JSON.stringify({ from: 'in_progress', to: 'agent_review', submission: true }), now);
 
       const updated = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story;
       return { content: [{ type: 'text', text: JSON.stringify(updated, null, 2) }] };
@@ -97,9 +97,9 @@ export function registerWorkflowTools(server: McpServer, role: Role): void {
         return { content: [{ type: 'text', text: `Error: Role "${role}" cannot approve reviews. Only PM can.` }], isError: true };
       }
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
       if (story.state !== 'agent_review') {
         return { content: [{ type: 'text', text: `Error: Story must be in "agent_review" to approve. Current state: "${story.state}".` }], isError: true };
@@ -119,9 +119,9 @@ export function registerWorkflowTools(server: McpServer, role: Role): void {
 
       const logId = `log_${nanoid(8)}`;
       db.prepare(`
-        INSERT INTO activity_log (id, story_id, actor, action, details, created_at)
-        VALUES (?, ?, ?, 'state_change', ?, ?)
-      `).run(logId, params.story_id, role, JSON.stringify({ from: 'agent_review', to: 'human_review', approved: true }), now);
+        INSERT INTO activity_log (id, project_id, story_id, actor, action, details, created_at)
+        VALUES (?, ?, ?, ?, 'state_change', ?, ?)
+      `).run(logId, projectId, params.story_id, role, JSON.stringify({ from: 'agent_review', to: 'human_review', approved: true }), now);
 
       const updated = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story;
       return { content: [{ type: 'text', text: JSON.stringify(updated, null, 2) }] };
@@ -140,9 +140,9 @@ export function registerWorkflowTools(server: McpServer, role: Role): void {
         return { content: [{ type: 'text', text: `Error: Role "${role}" cannot request changes. Only PM can.` }], isError: true };
       }
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
       if (story.state !== 'agent_review') {
         return { content: [{ type: 'text', text: `Error: Story must be in "agent_review" to request changes. Current state: "${story.state}".` }], isError: true };
@@ -160,9 +160,9 @@ export function registerWorkflowTools(server: McpServer, role: Role): void {
 
       const logId = `log_${nanoid(8)}`;
       db.prepare(`
-        INSERT INTO activity_log (id, story_id, actor, action, details, created_at)
-        VALUES (?, ?, ?, 'state_change', ?, ?)
-      `).run(logId, params.story_id, role, JSON.stringify({ from: 'agent_review', to: 'changes_requested' }), now);
+        INSERT INTO activity_log (id, project_id, story_id, actor, action, details, created_at)
+        VALUES (?, ?, ?, ?, 'state_change', ?, ?)
+      `).run(logId, projectId, params.story_id, role, JSON.stringify({ from: 'agent_review', to: 'changes_requested' }), now);
 
       const updated = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story;
       return { content: [{ type: 'text', text: JSON.stringify(updated, null, 2) }] };

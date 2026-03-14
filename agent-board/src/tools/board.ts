@@ -4,10 +4,10 @@ import { getDb } from '../db/connection.js';
 import { STORY_STATES } from '../constants.js';
 import type { Role, Story, ActivityLogEntry } from '../types.js';
 
-export function registerBoardTools(server: McpServer, role: Role): void {
+export function registerBoardTools(server: McpServer, role: Role, projectId: string): void {
   server.tool(
     'board_list_stories',
-    'List stories with optional filters.',
+    'List stories with optional filters. Scoped to current project.',
     {
       state: z.enum(STORY_STATES as [string, ...string[]]).optional().describe('Filter by state'),
       assigned_to: z.enum(['pm', 'dev']).optional().describe('Filter by assignee'),
@@ -16,14 +16,14 @@ export function registerBoardTools(server: McpServer, role: Role): void {
     },
     async (params) => {
       const db = getDb();
-      const conditions: string[] = [];
-      const values: unknown[] = [];
+      const conditions: string[] = ['project_id = ?'];
+      const values: unknown[] = [projectId];
 
       if (params.state) { conditions.push('state = ?'); values.push(params.state); }
       if (params.assigned_to) { conditions.push('assigned_to = ?'); values.push(params.assigned_to); }
       if (params.priority) { conditions.push('priority = ?'); values.push(params.priority); }
 
-      const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+      const where = `WHERE ${conditions.join(' AND ')}`;
       const limit = params.limit ?? 50;
 
       const stories = db.prepare(
@@ -39,7 +39,7 @@ export function registerBoardTools(server: McpServer, role: Role): void {
 
   server.tool(
     'board_get_board',
-    'Get the full board: stories grouped by column with counts.',
+    'Get the full board: stories grouped by column with counts. Scoped to current project.',
     {},
     async () => {
       const db = getDb();
@@ -47,9 +47,9 @@ export function registerBoardTools(server: McpServer, role: Role): void {
 
       for (const state of STORY_STATES) {
         const stories = db.prepare(
-          `SELECT id, title, priority, assigned_to, updated_at FROM stories WHERE state = ?
+          `SELECT id, title, priority, assigned_to, updated_at FROM stories WHERE project_id = ? AND state = ?
            ORDER BY CASE priority WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END, updated_at DESC`
-        ).all(state) as Partial<Story>[];
+        ).all(projectId, state) as Partial<Story>[];
         board[state] = { count: stories.length, stories };
       }
 
@@ -59,7 +59,7 @@ export function registerBoardTools(server: McpServer, role: Role): void {
 
   server.tool(
     'board_search_stories',
-    'Full-text search across story title, description, technical_spec, and acceptance_criteria.',
+    'Full-text search across story title, description, technical_spec, and acceptance_criteria. Scoped to current project.',
     {
       query: z.string().describe('Search query'),
     },
@@ -68,9 +68,9 @@ export function registerBoardTools(server: McpServer, role: Role): void {
       const pattern = `%${params.query}%`;
       const stories = db.prepare(
         `SELECT id, title, priority, state, assigned_to, updated_at FROM stories
-         WHERE title LIKE ? OR description LIKE ? OR technical_spec LIKE ? OR acceptance_criteria LIKE ?
+         WHERE project_id = ? AND (title LIKE ? OR description LIKE ? OR technical_spec LIKE ? OR acceptance_criteria LIKE ?)
          ORDER BY updated_at DESC LIMIT 20`
-      ).all(pattern, pattern, pattern, pattern) as Partial<Story>[];
+      ).all(projectId, pattern, pattern, pattern, pattern) as Partial<Story>[];
 
       return { content: [{ type: 'text', text: JSON.stringify(stories, null, 2) }] };
     }
@@ -78,7 +78,7 @@ export function registerBoardTools(server: McpServer, role: Role): void {
 
   server.tool(
     'board_get_activity',
-    'Query the activity log.',
+    'Query the activity log. Scoped to current project.',
     {
       since: z.string().optional().describe('ISO timestamp to filter after'),
       story_id: z.string().optional().describe('Filter by story'),
@@ -87,14 +87,14 @@ export function registerBoardTools(server: McpServer, role: Role): void {
     },
     async (params) => {
       const db = getDb();
-      const conditions: string[] = [];
-      const values: unknown[] = [];
+      const conditions: string[] = ['project_id = ?'];
+      const values: unknown[] = [projectId];
 
       if (params.since) { conditions.push('created_at > ?'); values.push(params.since); }
       if (params.story_id) { conditions.push('story_id = ?'); values.push(params.story_id); }
       if (params.actor) { conditions.push('actor = ?'); values.push(params.actor); }
 
-      const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+      const where = `WHERE ${conditions.join(' AND ')}`;
       const limit = params.limit ?? 50;
 
       const entries = db.prepare(
@@ -107,33 +107,29 @@ export function registerBoardTools(server: McpServer, role: Role): void {
 
   server.tool(
     'board_poll_changes',
-    'Poll for changes relevant to your role since a given timestamp. Core mechanism for agent awareness.',
+    'Poll for changes relevant to your role since a given timestamp. Scoped to current project.',
     {
       since: z.string().describe('ISO timestamp to check for changes after'),
     },
     async (params) => {
       const db = getDb();
 
-      // Get all activity since the timestamp
       const allActivity = db.prepare(
         `SELECT al.*, s.title as story_title, s.state as current_state
          FROM activity_log al
          LEFT JOIN stories s ON al.story_id = s.id
-         WHERE al.created_at > ? AND al.actor != ?
+         WHERE al.project_id = ? AND al.created_at > ? AND al.actor != ?
          ORDER BY al.created_at ASC`
-      ).all(params.since, role) as (ActivityLogEntry & { story_title: string; current_state: string })[];
+      ).all(projectId, params.since, role) as (ActivityLogEntry & { story_title: string; current_state: string })[];
 
-      // Filter by relevance to role
       let relevant = allActivity;
       if (role === 'pm') {
-        // PM cares about: submissions for review, dev comments
         relevant = allActivity.filter(a =>
           a.current_state === 'agent_review' ||
           a.action === 'state_change' && JSON.parse(a.details).to === 'agent_review' ||
           a.actor === 'dev'
         );
       } else if (role === 'dev') {
-        // Dev cares about: new stories in todo, change requests, PM comments
         relevant = allActivity.filter(a =>
           a.current_state === 'todo' ||
           a.current_state === 'changes_requested' ||

@@ -3,7 +3,7 @@ import { getDb } from '../db/connection.js';
 import { STORY_STATES } from '../constants.js';
 import type { Story } from '../types.js';
 
-export function registerBoardStateResource(server: McpServer): void {
+export function registerBoardStateResource(server: McpServer, projectId: string): void {
   server.resource(
     'board-state',
     'board://state',
@@ -14,9 +14,9 @@ export function registerBoardStateResource(server: McpServer): void {
 
       for (const state of STORY_STATES) {
         const stories = db.prepare(
-          `SELECT id, title, priority, assigned_to, updated_at FROM stories WHERE state = ?
+          `SELECT id, title, priority, assigned_to, updated_at FROM stories WHERE project_id = ? AND state = ?
            ORDER BY CASE priority WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END, updated_at DESC`
-        ).all(state) as Partial<Story>[];
+        ).all(projectId, state) as Partial<Story>[];
         board[state] = { count: stories.length, stories };
       }
 

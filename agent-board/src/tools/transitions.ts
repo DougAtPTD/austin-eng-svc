@@ -5,7 +5,7 @@ import { getDb } from '../db/connection.js';
 import { isValidTransition, canUseRole, STORY_STATES } from '../constants.js';
 import type { Role, Story, StoryState } from '../types.js';
 
-export function registerTransitionTools(server: McpServer, role: Role): void {
+export function registerTransitionTools(server: McpServer, role: Role, projectId: string): void {
   server.tool(
     'board_transition_story',
     'Move a story to a new state. Validates the transition is legal.',
@@ -16,15 +16,15 @@ export function registerTransitionTools(server: McpServer, role: Role): void {
     },
     async (params) => {
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
 
       const toState = params.to_state as StoryState;
       if (!isValidTransition(story.state, toState)) {
         return {
-          content: [{ type: 'text', text: `Error: Invalid transition from "${story.state}" to "${toState}". Valid targets: ${JSON.stringify(isValidTransition)}` }],
+          content: [{ type: 'text', text: `Error: Invalid transition from "${story.state}" to "${toState}".` }],
           isError: true,
         };
       }
@@ -39,9 +39,9 @@ export function registerTransitionTools(server: McpServer, role: Role): void {
 
       const logId = `log_${nanoid(8)}`;
       db.prepare(`
-        INSERT INTO activity_log (id, story_id, actor, action, details, created_at)
-        VALUES (?, ?, ?, 'state_change', ?, ?)
-      `).run(logId, params.story_id, role, JSON.stringify({ from: story.state, to: toState }), now);
+        INSERT INTO activity_log (id, project_id, story_id, actor, action, details, created_at)
+        VALUES (?, ?, ?, ?, 'state_change', ?, ?)
+      `).run(logId, projectId, params.story_id, role, JSON.stringify({ from: story.state, to: toState }), now);
 
       if (params.comment) {
         const commentId = `cmt_${nanoid(8)}`;
@@ -68,9 +68,9 @@ export function registerTransitionTools(server: McpServer, role: Role): void {
         return { content: [{ type: 'text', text: `Error: Role "${role}" cannot assign stories. Only PM can.` }], isError: true };
       }
       const db = getDb();
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(params.story_id, projectId) as Story | undefined;
       if (!story) {
-        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found.` }], isError: true };
+        return { content: [{ type: 'text', text: `Error: Story "${params.story_id}" not found in this project.` }], isError: true };
       }
 
       const now = new Date().toISOString();
@@ -79,9 +79,9 @@ export function registerTransitionTools(server: McpServer, role: Role): void {
 
       const logId = `log_${nanoid(8)}`;
       db.prepare(`
-        INSERT INTO activity_log (id, story_id, actor, action, details, created_at)
-        VALUES (?, ?, ?, 'assigned', ?, ?)
-      `).run(logId, params.story_id, role, JSON.stringify({ assigned_to: params.assign_to }), now);
+        INSERT INTO activity_log (id, project_id, story_id, actor, action, details, created_at)
+        VALUES (?, ?, ?, ?, 'assigned', ?, ?)
+      `).run(logId, projectId, params.story_id, role, JSON.stringify({ assigned_to: params.assign_to }), now);
 
       const updated = db.prepare('SELECT * FROM stories WHERE id = ?').get(params.story_id) as Story;
       return { content: [{ type: 'text', text: JSON.stringify(updated, null, 2) }] };

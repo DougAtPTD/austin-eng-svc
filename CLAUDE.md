@@ -2,6 +2,10 @@
 
 This project uses a local MCP-based board (`agent-board`) for coordinating work between a PM agent and a Developer agent.
 
+## Project
+
+This board is configured for project **austin-eng-svc**. The project name is set in `.mcp.json` via `AGENT_BOARD_PROJECT`. Each project you work on gets its own `.mcp.json` with its project name, and all stories/activity are scoped to that project automatically. The same shared database supports multiple projects.
+
 ## Your Role
 
 Check the `AGENT_BOARD_ROLE` environment variable to determine your role:

@@ -4,7 +4,8 @@
       "command": "node",
       "args": ["./agent-board/dist/index.js"],
       "env": {
-        "AGENT_BOARD_ROLE": "${AGENT_BOARD_ROLE}"
+        "AGENT_BOARD_ROLE": "${AGENT_BOARD_ROLE}",
+        "AGENT_BOARD_PROJECT": "austin-eng-svc"
       }
     }
   }

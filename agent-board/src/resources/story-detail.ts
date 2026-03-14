@@ -2,7 +2,7 @@ import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mc
 import { getDb } from '../db/connection.js';
 import type { Story, Comment, ActivityLogEntry } from '../types.js';
 
-export function registerStoryDetailResource(server: McpServer): void {
+export function registerStoryDetailResource(server: McpServer, projectId: string): void {
   server.resource(
     'story-detail',
     new ResourceTemplate('board://story/{storyId}', { list: undefined }),
@@ -11,9 +11,9 @@ export function registerStoryDetailResource(server: McpServer): void {
       const storyId = params.storyId as string;
       const db = getDb();
 
-      const story = db.prepare('SELECT * FROM stories WHERE id = ?').get(storyId) as Story | undefined;
+      const story = db.prepare('SELECT * FROM stories WHERE id = ? AND project_id = ?').get(storyId, projectId) as Story | undefined;
       if (!story) {
-        return { contents: [{ uri: uri.href, text: JSON.stringify({ error: `Story "${storyId}" not found` }), mimeType: 'application/json' }] };
+        return { contents: [{ uri: uri.href, text: JSON.stringify({ error: `Story "${storyId}" not found in this project` }), mimeType: 'application/json' }] };
       }
 
       const comments = db.prepare('SELECT * FROM comments WHERE story_id = ? ORDER BY created_at ASC').all(storyId) as Comment[];
@@ -38,9 +38,9 @@ export function registerStoryDetailResource(server: McpServer): void {
       const db = getDb();
 
       const stories = db.prepare(
-        `SELECT * FROM stories WHERE state = ?
+        `SELECT * FROM stories WHERE project_id = ? AND state = ?
          ORDER BY CASE priority WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END, updated_at DESC`
-      ).all(state) as Story[];
+      ).all(projectId, state) as Story[];
 
       return {
         contents: [{
